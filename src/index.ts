@@ -2,7 +2,7 @@ export interface AnyAction {
   type: any;
 }
 
-export type Meta = null | {[key: string]: any};
+export type Meta = null | { [key: string]: any };
 
 export interface Action<Payload> extends AnyAction {
   type: string;
@@ -61,6 +61,7 @@ export interface ActionCreator<Payload> {
    *      actionArray.filter(somethingHappened.match);
    */
   match: (action: AnyAction) => action is Action<Payload>;
+
   /**
    * Creates action with given payload and metadata.
    *
@@ -71,18 +72,32 @@ export interface ActionCreator<Payload> {
 }
 
 export type Success<Params, Result> = (
-  | {params: Params}
-  | (Params extends void ? {params?: Params} : never)) &
-  ({result: Result} | (Result extends void ? {result?: Result} : never));
+  | { params: Params }
+  | (Params extends void ? { params?: Params } : never)
+) &
+  ({ result: Result } | (Result extends void ? { result?: Result } : never));
+
+export type Optimistic<Params, Result> = (
+  | { params: Params }
+  | (Params extends void ? { params?: Params } : never)
+) &
+  ({ result: Result } | (Result extends void ? { result?: Result } : never));
 
 export type Failure<Params, Error> = (
-  | {params: Params}
-  | (Params extends void ? {params?: Params} : never)) & {error: Error};
+  | { params: Params }
+  | (Params extends void ? { params?: Params } : never)
+) & { error: Error };
 
-export interface AsyncActionCreators<Params, Result, Error = {}> {
+export interface AsyncActionCreators<
+  Params,
+  Result,
+  Error = unknown,
+  PreResult = unknown,
+> {
   type: string;
   started: ActionCreator<Params>;
   done: ActionCreator<Success<Params, Result>>;
+  optimistic: ActionCreator<Optimistic<Params, PreResult>>;
   failed: ActionCreator<Failure<Params, Error>>;
 }
 
@@ -94,12 +109,12 @@ export interface ActionCreatorFactory {
    * @param type Type of created actions.
    * @param commonMeta Metadata added to created actions.
    * @param isError Defines whether created actions are error actions.
-   */
-  <Payload = void>(
+   */ <Payload = void>(
     type: string,
     commonMeta?: Meta,
     isError?: boolean,
   ): ActionCreator<Payload>;
+
   /**
    * Creates Action Creator that produces actions with given `type` and payload
    * of type `Payload`.
@@ -108,8 +123,7 @@ export interface ActionCreatorFactory {
    * @param commonMeta Metadata added to created actions.
    * @param isError Function that detects whether action is error given the
    *   payload.
-   */
-  <Payload = void>(
+   */ <Payload = void>(
     type: string,
     commonMeta?: Meta,
     isError?: (payload: Payload) => boolean,
@@ -127,10 +141,10 @@ export interface ActionCreatorFactory {
    *   `${type}_STARTED`, `${type}_DONE` and `${type}_FAILED`.
    * @param commonMeta Metadata added to created actions.
    */
-  async<Params, Result, Error = {}>(
+  async<Params, Result, Error = unknown, PreResult = unknown>(
     type: string,
     commonMeta?: Meta,
-  ): AsyncActionCreators<Params, Result, Error>;
+  ): AsyncActionCreators<Params, Result, Error, PreResult>;
 }
 
 declare const process: {
@@ -147,9 +161,9 @@ declare const process: {
  */
 export function actionCreatorFactory(
   prefix?: string | null,
-  defaultIsError: (payload: any) => boolean = p => p instanceof Error,
+  defaultIsError: (payload: any) => boolean = (p) => p instanceof Error,
 ): ActionCreatorFactory {
-  const actionTypes: {[type: string]: boolean} = {};
+  const actionTypes: { [type: string]: boolean } = {};
 
   const base = prefix ? `${prefix}/` : '';
 
@@ -193,15 +207,20 @@ export function actionCreatorFactory(
     ) as ActionCreator<Payload>;
   }
 
-  function asyncActionCreators<Params, Result, Error>(
+  function asyncActionCreators<Params, Result, Error, PreResult>(
     type: string,
     commonMeta?: Meta,
-  ): AsyncActionCreators<Params, Result, Error> {
+  ): AsyncActionCreators<Params, Result, Error, PreResult> {
     return {
       type: base + type,
       started: actionCreator<Params>(`${type}_STARTED`, commonMeta, false),
       done: actionCreator<Success<Params, Result>>(
         `${type}_DONE`,
+        commonMeta,
+        false,
+      ),
+      optimistic: actionCreator<Optimistic<Params, PreResult>>(
+        `${type}_OPTIMISTIC`,
         commonMeta,
         false,
       ),
@@ -213,7 +232,7 @@ export function actionCreatorFactory(
     };
   }
 
-  return Object.assign(actionCreator, {async: asyncActionCreators});
+  return Object.assign(actionCreator, { async: asyncActionCreators });
 }
 
 export default actionCreatorFactory;

@@ -1,6 +1,6 @@
 {
   "name": "typescript-fsa",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "description": "Type-safe action creator utilities",
   "keywords": [
     "redux",
@@ -11,37 +11,47 @@
   ],
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
+  "module": "lib/index.mjs",
   "files": [
     "dist",
     "lib",
     "src"
   ],
-  "repository": "aikoven/typescript-fsa",
+  "repository": "marcoturi/typescript-fsa",
   "scripts": {
     "clean": "rimraf lib dist",
-    "lint": "tslint -c tslint.json src/index.ts tests/index.ts",
+    "lint": "eslint src --ext .js,.ts --fix",
     "test": "ts-node -P tsconfig.tests.json node_modules/.bin/tape tests/*.ts",
     "build:commonjs": "tsc",
-    "build:umd": "NODE_ENV=development rollup -c -o dist/typescript-fsa.js",
-    "build:umd:min": "NODE_ENV=production rollup -c -o dist/typescript-fsa.min.js",
+    "build:umd": "NODE_ENV=development rollup -c",
+    "build:umd:min": "NODE_ENV=production rollup -c",
     "build": "npm run build:commonjs && npm run build:umd && npm run build:umd:min",
-    "prepublish": "npm run clean && npm run lint && npm run test && npm run build"
+    "prepublish": "npm run clean && npm run lint && npm run test && npm run build",
+    "format": "prettier --write \"src/**/*\""
   },
   "author": "Daniel Lytkin <dan.lytkin@gmail.com>",
   "license": "MIT",
   "devDependencies": {
-    "@alexlur/rollup-plugin-typescript": "^1.0.4",
-    "@types/tape": "^4.2.28",
-    "rimraf": "^2.5.4",
-    "rollup": "^0.46.0",
-    "rollup-plugin-execute": "^1.0.0",
-    "rollup-plugin-replace": "^1.1.1",
-    "rollup-plugin-uglify": "^2.0.1",
-    "tape": "^4.6.2",
-    "ts-node": "^8.4.0",
-    "tslint": "^5.0.0",
-    "typescript": "^3.6.2",
-    "typings-tester": "^0.3.0"
+    "@types/tape": "4.13.2",
+    "@types/node": "17.0.21",
+    "@typescript-eslint/eslint-plugin": "5.14.0",
+    "@typescript-eslint/parser": "5.14.0",
+    "eslint": "8.10.0",
+    "eslint-config-prettier": "8.5.0",
+    "eslint-config-standard": "16.0.3",
+    "eslint-plugin-import": "2.25.4",
+    "eslint-plugin-node": "11.1.0",
+    "eslint-plugin-promise": "6.0.0",
+    "esbuild": "0.14.25",
+    "rimraf": "3.0.2",
+    "rollup": "2.70.0",
+    "rollup-plugin-dts": "4.2.0",
+    "rollup-plugin-esbuild": "4.8.2",
+    "prettier": "2.5.1",
+    "tape": "5.5.2",
+    "ts-node": "10.7.0",
+    "typescript": "4.6.2",
+    "typings-tester": "0.3.2"
   },
   "greenkeeper": {
     "ignore": [

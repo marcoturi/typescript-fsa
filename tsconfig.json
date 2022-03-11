@@ -1,12 +1,13 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "module": "commonjs",
-    "lib": ["es2015"],
+    "target": "esnext",
+    "module": "esnext",
+    "lib": ["dom", "esnext"],
     "moduleResolution": "node",
     "declaration": true,
     "declarationDir": "lib",
     "outDir": "lib",
+    "strict": true,
     "noImplicitReturns": true,
     "noImplicitAny": true,
     "strictNullChecks": true
