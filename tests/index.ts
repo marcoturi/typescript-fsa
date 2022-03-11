@@ -1,3 +1,4 @@
+// @ts-ignore
 import test = require('tape');
 import {join} from "path";
 import {checkDirectory} from "typings-tester";
